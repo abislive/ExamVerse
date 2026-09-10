@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+<meta name="theme-color" content="#060912">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no">
+<title>ExamVerse — Universal Examination Platform</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div>
+
+<div id="app">
+  <div class="brand"><div class="logo">E</div><h1 id="brandName">ExamVerse</h1></div>
+  <p class="tagline" id="tagline">One platform · Every subject · Every language</p>
+  <div id="fatal"></div>
+
+  <nav class="steps" id="steps"></nav>
+
+  <!-- LEVEL -->
+  <section id="s-level" class="screen active">
+    <h2 class="title" id="tLevel">Choose your level</h2>
+    <p class="sub" id="sLevel">From Class 8 to PhD — pick where you stand</p>
+    <div class="grid g-level" id="levelGrid"></div>
+  </section>
+
+  <!-- SUBJECT -->
+  <section id="s-subject" class="screen">
+    <h2 class="title" id="tSubject">Choose your subject</h2>
+    <p class="sub" id="sSubject"></p>
+    <div class="grid g-sub" id="subjectGrid"></div>
+    <div class="center"><button class="btn ghost" id="backLevel">← Back</button></div>
+  </section>
+
+  <!-- LANGUAGE -->
+  <section id="s-lang" class="screen">
+    <h2 class="title" id="tLang">Choose exam language</h2>
+    <p class="sub" id="sLang">Questions are translated automatically into your language</p>
+    <div class="grid g-lang" id="langGrid"></div>
+    <div class="center"><button class="btn ghost" id="backSubject">← Back</button></div>
+  </section>
+
+  <!-- READY -->
+  <section id="s-ready" class="screen">
+    <h2 class="title" id="tReady">Ready to begin?</h2>
+    <p class="sub" id="sReady"></p>
+    <div class="panel">
+      <div class="kv"><span id="kSubject">Subject</span><b id="vSubject">—</b></div>
+      <div class="kv"><span id="kLevel">Level</span><b id="vLevel">—</b></div>
+      <div class="kv"><span id="kLang">Language</span><b id="vLang">—</b></div>
+      <div class="kv"><span id="kQ">Questions</span><b>100</b></div>
+      <div class="kv"><span id="kMarks">Marks per question</span><b>2</b></div>
+      <div class="kv"><span id="kTotal">Total marks</span><b>200</b></div>
+      <div class="kv"><span id="kTime">Duration</span><b id="vTime">120 min</b></div>
+      <div class="kv"><span id="kPass">Passing criteria</span><b id="vPass">&gt; 60%</b></div>
+      <ul class="rules" id="rulesList"></ul>
+      <div class="readyWrap"><button class="readyBtn" id="btnReady">I'm Ready — Start Exam</button></div>
+    </div>
+    <div class="center"><button class="btn ghost" id="backLang">← Back</button></div>
+  </section>
+
+  <!-- EXAM -->
+  <section id="s-exam" class="screen">
+    <div class="exam-head">
+      <div class="pills">
+        <span class="pill" id="exSubject"></span><span class="pill" id="exLevel"></span>
+      </div>
+      <div class="timer" id="timer">02:00:00</div>
+      <button class="btn sm danger" id="btnSubmitTop">Submit</button>
+    </div>
+    <div class="exam-body">
+      <div class="qpanel">
+        <div class="qmeta"><span id="qIndex">Question 1 / 100</span><span id="qMarks">+2 Marks</span></div>
+        <div class="qtext" id="qText"></div>
+        <div class="options" id="options"></div>
+        <div class="qactions">
+          <div class="left">
+            <button class="btn sm" id="btnPrev">← Prev</button>
+            <button class="btn sm ghost" id="btnClear">Clear</button>
+            <button class="btn sm ghost" id="btnMark">Mark</button>
+          </div>
+          <button class="btn sm primary" id="btnNext">Next →</button>
+        </div>
+      </div>
+      <aside class="palette" id="palette">
+        <div class="palette-close">
+          <span id="palTitle">Question Palette</span>
+          <button type="button" id="paletteClose" aria-label="Close palette">✕</button>
+        </div>
+        <div class="pgrid" id="pgrid"></div>
+        <div class="legend">
+          <span><i class="sw" style="background:rgba(34,197,94,.5)"></i><span id="lgAns">Answered</span></span>
+          <span><i class="sw" style="background:rgba(245,158,11,.6)"></i><span id="lgMark">Marked</span></span>
+          <span><i class="sw" style="background:rgba(255,255,255,.08)"></i><span id="lgNot">Not answered</span></span>
+        </div>
+      </aside>
+    </div>
+    <button class="palette-toggle" id="paletteToggle" aria-label="Open question palette">☰</button>
+    <div class="palette-backdrop" id="paletteBackdrop"></div>
+  </section>
+
+  <!-- RESULT -->
+  <section id="s-result" class="screen">
+    <div class="resultWrap">
+      <div class="ringBox">
+        <svg viewBox="0 0 200 200" aria-hidden="true">
+          <circle class="ring-bg" cx="100" cy="100" r="86"></circle>
+          <circle class="ring-fg" id="ringFg" cx="100" cy="100" r="86"></circle>
+        </svg>
+        <div class="ringTxt"><div class="big" id="ringPct">0%</div><div class="small" id="ringLbl">Score</div></div>
+      </div>
+      <div class="verdict" id="verdict">—</div>
+      <p class="sub" id="verdictSub"></p>
+      <div class="stats" id="stats"></div>
+      <div class="center">
+        <button class="btn primary" id="btnReview">Review Answers</button>
+        <button class="btn" id="btnRetake">Retake Exam</button>
+        <button class="btn ghost" id="btnHome">Home</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- REVIEW -->
+  <section id="s-review" class="screen">
+    <h2 class="title" id="tReview">Answer Review</h2>
+    <p class="sub" id="sReview"></p>
+    <div id="reviewList"></div>
+    <div class="center"><button class="btn primary" id="btnBackResult">← Back to Result</button></div>
+  </section>
+
+  <p class="note" id="footNote"></p>
+</div>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true">
+  <div class="modalBox">
+    <h3 id="mTitle">Submit exam?</h3>
+    <p id="mText">You still have unanswered questions.</p>
+    <div class="center" style="margin-top:0">
+      <button class="btn" id="mCancel">Cancel</button>
+      <button class="btn primary" id="mOk">Submit</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/util.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/data.js"></script>
+<script src="js/generators.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
