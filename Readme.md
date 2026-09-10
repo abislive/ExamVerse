@@ -2,6 +2,7 @@
 
 A fully static MCQ exam platform. Pick a level (Class 8 → PhD), a subject,
 and a language; take a 120-minute, 100-question exam; get an instant score.
+
 ## Demo
 
 Link - https://abislive.github.io/ExamVerse/
