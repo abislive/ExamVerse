@@ -1,7 +1,7 @@
 'use strict';
 
 /* ============================================================
-   Option builder
+   Option builder (used only by the generator path)
 ============================================================ */
 function mk(q, correct, wrongs){
   const c = String(correct);
@@ -58,7 +58,8 @@ function mk(q, correct, wrongs){
 const S = {
   level:null, subjectKey:null, bankKey:null, diff:1,
   questions:[], answers:[], marked:new Set(), cur:0,
-  timeLeft:7200, timerId:null, started:false
+  timeLeft:7200, timerId:null, started:false, submitted:false,
+  cfg:{ numQ:100, marksPerQ:2, totalMarks:200, durationSec:7200 }
 };
 
 /* ============================================================
@@ -71,6 +72,7 @@ function el(tag, cls, html){
   if(html != null) e.innerHTML = html;
   return e;
 }
+function safeText(s){ return String(s == null ? '' : s); }
 
 const STEP_MAP = {
   's-level':1, 's-subject':2, 's-lang':3, 's-ready':3,
@@ -92,14 +94,18 @@ function renderSteps(screenId){
 }
 
 function show(id){
-  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
-  $(id).classList.add('active');
+  document.querySelectorAll('.screen').forEach(function(s){
+    s.classList.remove('active'); s.classList.add('hidden');
+  });
+  const target = $(id);
+  target.classList.remove('hidden');
+  target.classList.add('active');
   window.scrollTo({ top:0, behavior:'smooth' });
   renderSteps(id);
 }
 
 /* ============================================================
-   Language application
+   Language
 ============================================================ */
 function applyLanguage(){
   document.documentElement.lang = LANG;
@@ -123,7 +129,6 @@ function applyLanguage(){
   $('kTotal').textContent    = u('kTotal');
   $('kTime').textContent     = u('kTime');
   $('kPass').textContent     = u('kPass');
-  $('vTime').textContent     = '120 ' + u('minutes');
 
   $('backLevel').textContent   = u('back');
   $('backSubject').textContent = u('back');
@@ -155,8 +160,46 @@ function applyLanguage(){
   $('rulesList').innerHTML = ['rules','rules2','rules3','rules4','rules5']
     .map(function(k){ return '<li>' + u(k) + '</li>'; }).join('');
 
+  refreshReadyPanel();
+
   const active = document.querySelector('.screen.active');
   renderSteps(active ? active.id : 's-level');
+}
+
+/* ============================================================
+   Exam config — dynamic based on selected bank
+============================================================ */
+function computeConfig(){
+  const fixed = (typeof FIXED_BANKS !== 'undefined') && FIXED_BANKS[S.bankKey];
+  if(fixed && Array.isArray(fixed) && fixed.length > 0){
+    const n = fixed.length;
+    return {
+      numQ: n,
+      marksPerQ: 1,
+      totalMarks: n,
+      durationSec: Math.max(60, n * 60) /* 1 min per question, min 1 min */
+    };
+  }
+  return {
+    numQ: TARGET_QUESTIONS,
+    marksPerQ: 2,
+    totalMarks: TARGET_QUESTIONS * 2,
+    durationSec: 7200
+  };
+}
+
+function fmtDuration(sec){
+  const m = Math.floor(sec / 60);
+  return m + ' ' + u('minutes');
+}
+
+function refreshReadyPanel(){
+  const c = computeConfig();
+  S.cfg = c;
+  if($('vQ'))     $('vQ').textContent     = c.numQ;
+  if($('vMarks')) $('vMarks').textContent = c.marksPerQ;
+  if($('vTotal')) $('vTotal').textContent = c.totalMarks;
+  if($('vTime'))  $('vTime').textContent  = fmtDuration(c.durationSec);
 }
 
 /* ============================================================
@@ -166,7 +209,8 @@ function buildLevels(){
   const g = $('levelGrid');
   g.innerHTML = '';
   LEVELS.forEach(function(lv, i){
-    const c = el('div','card');
+    const c = el('button','card');
+    c.type = 'button';
     c.style.animationDelay = (i * 45) + 'ms';
     c.innerHTML =
       '<span class="ico">' + lv.icon + '</span>' +
@@ -183,18 +227,23 @@ function buildSubjects(lv){
   const g = $('subjectGrid');
   g.innerHTML = '';
   lv.subjects.forEach(function(s, i){
-    const c = el('div','card');
+    const c = el('button','card');
+    c.type = 'button';
     c.style.animationDelay = (i * 40) + 'ms';
+    const bankKey = s[1];
+    const isFixed = (typeof FIXED_BANKS !== 'undefined') && FIXED_BANKS[bankKey];
+    const numQ = isFixed ? FIXED_BANKS[bankKey].length : TARGET_QUESTIONS;
+    const mk_ = isFixed ? 1 : 2;
     c.innerHTML =
       '<span class="ico">' + s[2] + '</span>' +
       '<div class="nm">' + sname(s[0]) + '</div>' +
-      '<div class="meta"><span class="badge c">100 Q</span>' +
-      '<span class="badge g">200 ' + u('stMarks') + '</span></div>';
+      '<div class="meta"><span class="badge c">' + numQ + ' Q</span>' +
+      '<span class="badge g">' + (numQ * mk_) + ' ' + u('stMarks') + '</span></div>';
     c.onclick = function(){
       g.querySelectorAll('.card').forEach(function(x){ x.classList.remove('sel'); });
       c.classList.add('sel');
       S.subjectKey = s[0];
-      S.bankKey = s[1];
+      S.bankKey = bankKey;
       S.diff = lv.d;
       setTimeout(buildLangs, 220);
     };
@@ -206,7 +255,8 @@ function buildLangs(){
   const g = $('langGrid');
   g.innerHTML = '';
   LANG_INFO.forEach(function(L, i){
-    const c = el('div','card');
+    const c = el('button','card');
+    c.type = 'button';
     c.style.animationDelay = (i * 45) + 'ms';
     c.innerHTML =
       '<span class="ico">' + L.flag + '</span>' +
@@ -228,7 +278,9 @@ function buildLangs(){
 function goReady(){
   $('vSubject').textContent = sname(S.subjectKey);
   $('vLevel').textContent   = S.level.name[idx()] || S.level.name[0];
-  $('vLang').textContent    = LANG_INFO.filter(function(l){ return l.code === LANG; })[0].native;
+  const li = LANG_INFO.filter(function(l){ return l.code === LANG; })[0];
+  $('vLang').textContent    = li ? li.native : LANG;
+  refreshReadyPanel();
   show('s-ready');
 }
 
@@ -237,6 +289,20 @@ function goReady(){
 ============================================================ */
 const TARGET_QUESTIONS = 100;
 
+/* Build from FIXED_BANKS[S.bankKey] */
+function buildFromFixed(bank){
+  const out = [];
+  bank.forEach(function(raw){
+    if(!raw || !raw.question || !Array.isArray(raw.options)) return;
+    const opts = raw.options.map(String);
+    const ansIdx = opts.indexOf(String(raw.answer));
+    if(ansIdx < 0) return;
+    out.push({ q: String(raw.question), opts: opts.slice(), ans: ansIdx });
+  });
+  return out;
+}
+
+/* Generator path */
 function buildPool(gens, diff, target){
   const seen = new Set();
   const out = [];
@@ -259,11 +325,19 @@ function buildPool(gens, diff, target){
 }
 
 function generateExam(){
+  /* ---------- Fixed PDF bank ---------- */
+  if(typeof FIXED_BANKS !== 'undefined' && FIXED_BANKS[S.bankKey]){
+    const built = buildFromFixed(FIXED_BANKS[S.bankKey]);
+    if(built.length > 0){
+      /* Shuffle so retakes give a fresh order; use every question. */
+      return shuffle(built.slice());
+    }
+  }
+
+  /* ---------- Generator path (existing behaviour) ---------- */
   const primary = BANKS[S.bankKey] || GENERAL;
   let pool = buildPool(primary, S.diff, TARGET_QUESTIONS);
 
-  /* If the chosen subject is small, top up with questions from the same
-     discipline family — never with unrelated subjects. */
   if(pool.length < TARGET_QUESTIONS){
     const family = {
       social:  [SOCIAL, RESEARCH, ENGLISH],
@@ -293,7 +367,6 @@ function generateExam(){
     }
   }
 
-  /* Absolute last resort — identical strings are re-worded, never repeated. */
   let pad = 1;
   while(pool.length < TARGET_QUESTIONS){
     const r = MATH[pool.length % MATH.length](S.diff);
@@ -310,11 +383,13 @@ function generateExam(){
 function startExam(){
   seedRNG((Date.now() ^ Math.floor(Math.random() * 1e9)) >>> 0);
 
+  S.cfg = computeConfig();
   S.questions = generateExam();
   S.answers = new Array(S.questions.length).fill(null);
   S.marked  = new Set();
   S.cur     = 0;
-  S.timeLeft = 7200;
+  S.timeLeft = S.cfg.durationSec;
+  S.submitted = false;
 
   $('exSubject').textContent = sname(S.subjectKey);
   $('exLevel').textContent   = S.level.name[idx()] || S.level.name[0];
@@ -329,6 +404,8 @@ function startExam(){
     S.timeLeft--;
     updateTimerUI();
     if(S.timeLeft <= 0){
+      S.timeLeft = 0;
+      updateTimerUI();
       clearInterval(S.timerId);
       openModal(u('timeUp'), u('timeUpMsg'), finishExam);
       setTimeout(function(){
@@ -356,12 +433,15 @@ function buildPalette(){
   const g = $('pgrid');
   g.innerHTML = '';
   S.questions.forEach(function(_, i){
-    const d = el('div','pnum', String(i + 1));
-    d.onclick = function(){ 
-      S.cur = i; 
-      renderQuestion(); 
-      if($('palette') && $('palette').classList.contains('open')){
-        $('palette').classList.remove('open');
+    const d = el('button','pnum', String(i + 1));
+    d.type = 'button';
+    d.setAttribute('aria-label', 'Go to question ' + (i + 1));
+    d.onclick = function(){
+      S.cur = i;
+      renderQuestion();
+      const pal = $('palette');
+      if(pal && pal.classList.contains('open')){
+        pal.classList.remove('open');
         $('paletteBackdrop').classList.remove('on');
       }
     };
@@ -387,21 +467,22 @@ function renderQuestion(){
   $('qIndex').textContent = u('qOf')
     .replace('{a}', S.cur + 1)
     .replace('{b}', S.questions.length);
-  $('qMarks').textContent = u('marksPlus');
+  $('qMarks').textContent = '+' + S.cfg.marksPerQ + ' ' + u('stMarks');
 
   const qt = $('qText');
-  qt.style.animation = 'none';
-  void qt.offsetWidth;
-  qt.style.animation = '';
-  qt.textContent = q.q;
+  qt.textContent = safeText(q.q);
 
   const box = $('options');
   box.innerHTML = '';
-  const keys = ['A','B','C','D'];
+  const keys = ['A','B','C','D','E','F'];
   q.opts.forEach(function(o, i){
-    const d = el('div','opt' + (S.answers[S.cur] === i ? ' sel' : ''));
+    const d = el('button','opt' + (S.answers[S.cur] === i ? ' sel' : ''));
+    d.type = 'button';
+    d.setAttribute('role', 'radio');
+    d.setAttribute('aria-checked', S.answers[S.cur] === i ? 'true' : 'false');
     d.style.animationDelay = (i * 55) + 'ms';
-    d.innerHTML = '<span class="key">' + keys[i] + '</span><span class="txt">' + o + '</span>';
+    d.innerHTML = '<span class="key">' + keys[i] + '</span>' +
+                  '<span class="txt">' + safeText(o) + '</span>';
     d.onclick = function(){ S.answers[S.cur] = i; renderQuestion(); };
     box.appendChild(d);
   });
@@ -419,9 +500,10 @@ function renderQuestion(){
 let modalAction = null;
 function openModal(title, text, cb){
   $('mTitle').textContent = title;
-  $('mText').innerHTML = text;
+  $('mText').textContent  = safeText(text);
   modalAction = cb;
   $('modal').classList.add('on');
+  $('mOk').focus();
 }
 function closeModal(){
   $('modal').classList.remove('on');
@@ -432,6 +514,9 @@ function closeModal(){
    Finish + result
 ============================================================ */
 function finishExam(){
+  if(S.submitted) return;
+  S.submitted = true;
+
   clearInterval(S.timerId);
   closeModal();
 
@@ -443,9 +528,10 @@ function finishExam(){
     else wrong++;
   });
 
-  const total = S.questions.length * 2;
-  const marks = correct * 2;
-  const pct   = Math.round((marks / total) * 1000) / 10;
+  const mpq = S.cfg.marksPerQ;
+  const total = S.questions.length * mpq;
+  const marks = correct * mpq;
+  const pct   = total > 0 ? Math.round((marks / total) * 1000) / 10 : 0;
   const passed = pct > 60;
 
   const circ = 540.35;
@@ -482,20 +568,20 @@ function finishExam(){
 function buildReview(){
   const list = $('reviewList');
   list.innerHTML = '';
-  const keys = ['A','B','C','D'];
+  const keys = ['A','B','C','D','E','F'];
 
   S.questions.forEach(function(q, i){
     const a = S.answers[i];
     const item = el('div','revItem');
     item.style.animationDelay = Math.min(i * 8, 600) + 'ms';
 
-    let html = '<div class="rq">' + (i + 1) + '. ' + q.q + '</div>';
+    let html = '<div class="rq">' + (i + 1) + '. ' + safeText(q.q) + '</div>';
     q.opts.forEach(function(o, j){
       let cls = 'neutral', tag = '';
       if(j === q.ans){ cls = 'ok'; tag = '<span class="revTag ok">' + u('correctAns') + '</span>'; }
       if(a === j && j !== q.ans){ cls = 'bad'; tag = '<span class="revTag bad">' + u('yourAns') + '</span>'; }
       if(a === j && j === q.ans){ tag = '<span class="revTag ok">' + u('yourAns') + ' ✓</span>'; }
-      html += '<div class="ro ' + cls + '"><b>' + keys[j] + '.</b><span>' + o + '</span>' + tag + '</div>';
+      html += '<div class="ro ' + cls + '"><b>' + keys[j] + '.</b><span>' + safeText(o) + '</span>' + tag + '</div>';
     });
     if(a == null) html += '<div class="ro neutral">' + u('notAns') + '</div>';
 
@@ -559,11 +645,25 @@ $('modal').onclick = function(e){ if(e.target.id === 'modal') closeModal(); };
 
 $('btnReview').onclick     = buildReview;
 $('btnBackResult').onclick = function(){ show('s-result'); };
-$('btnRetake').onclick     = function(){ S.cur = 0; startExam(); };
+$('btnRetake').onclick     = function(){ S.cur = 0; S.submitted = false; startExam(); };
 $('btnHome').onclick = function(){
-  S.level = null; S.subjectKey = null; S.bankKey = null;
+  S.level = null; S.subjectKey = null; S.bankKey = null; S.submitted = false;
   show('s-level');
 };
+
+/* Keyboard shortcuts during exam */
+document.addEventListener('keydown', function(e){
+  const ex = document.getElementById('s-exam');
+  if(!ex || !ex.classList.contains('active')) return;
+  if(e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+  if(e.key === 'ArrowRight'){ $('btnNext').click(); }
+  if(e.key === 'ArrowLeft'){ $('btnPrev').click(); }
+  if(/^[1-6]$/.test(e.key)){
+    const i = parseInt(e.key, 10) - 1;
+    const opts = $('options').children;
+    if(opts[i]) opts[i].click();
+  }
+});
 
 /* ============================================================
    Init
