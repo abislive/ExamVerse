@@ -7,90 +7,154 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="format-detection" content="telephone=no">
+<meta name="description" content="ExamVerse — Universal online examination platform. Tally ERP 9 MCQ bank + generated subjects.">
 <title>ExamVerse — Universal Examination Platform</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          ink:   { 950:'#060912', 900:'#0b1020', 800:'#0e1324' },
+          brand: { 500:'#7c5cff', 400:'#9c86ff' },
+          cy:    { 400:'#22d3ee', 500:'#06b6d4' }
+        },
+        fontFamily: {
+          sans: ['Segoe UI','system-ui','-apple-system','Noto Sans','Noto Sans Devanagari',
+                 'Noto Sans Bengali','Noto Nastaliq Urdu','sans-serif']
+        },
+        boxShadow: {
+          glow: '0 24px 60px -20px rgba(124,92,255,.75)',
+          glowCyan: '0 20px 50px -18px rgba(34,211,238,.9)'
+        },
+        keyframes: {
+          fadeUp:{ '0%':{opacity:'0',transform:'translateY(22px)'}, '100%':{opacity:'1',transform:'translateY(0)'} },
+          pop:{ '0%':{opacity:'0',transform:'scale(.85)'}, '60%':{transform:'scale(1.05)'}, '100%':{opacity:'1',transform:'scale(1)'} },
+          shimmer:{ '0%':{backgroundPosition:'0% center'}, '100%':{backgroundPosition:'250% center'} },
+          pulseSoft:{ '0%,100%':{opacity:'1'}, '50%':{opacity:'.45'} },
+          slideIn:{ '0%':{opacity:'0',transform:'translateX(22px)'}, '100%':{opacity:'1',transform:'translateX(0)'} }
+        },
+        animation: {
+          fadeUp:'fadeUp .55s cubic-bezier(.2,.8,.2,1) both',
+          pop:'pop .45s cubic-bezier(.2,1.3,.4,1) both',
+          shimmer:'shimmer 6s linear infinite',
+          pulseSoft:'pulseSoft 1.6s ease-in-out infinite',
+          slideIn:'slideIn .35s cubic-bezier(.2,.8,.2,1) both'
+        }
+      }
+    }
+  };
+</script>
 <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
-<div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div>
+<body class="min-h-screen bg-ink-950 text-slate-100 font-sans overflow-x-hidden antialiased
+             pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
 
-<div id="app">
-  <div class="brand"><div class="logo">E</div><h1 id="brandName">ExamVerse</h1></div>
-  <p class="tagline" id="tagline">One platform · Every subject · Every language</p>
-  <div id="fatal"></div>
+<div class="orb orb1" aria-hidden="true"></div>
+<div class="orb orb2" aria-hidden="true"></div>
+<div class="orb orb3" aria-hidden="true"></div>
 
-  <nav class="steps" id="steps"></nav>
+<main id="app" class="relative z-10 max-w-[1180px] mx-auto px-3 sm:px-4 pt-6 pb-24">
+
+  <header class="flex items-center justify-center gap-3 mb-1">
+    <div class="w-11 h-11 rounded-2xl grid place-items-center font-extrabold text-white text-xl
+                bg-gradient-to-br from-brand-500 to-cy-400 shadow-glow animate-pop"
+         aria-hidden="true">E</div>
+    <h1 id="brandName"
+        class="text-2xl sm:text-3xl font-extrabold tracking-tight
+               bg-gradient-to-r from-white via-cy-400 to-brand-500 bg-clip-text text-transparent
+               bg-[length:250%_auto] animate-shimmer">ExamVerse</h1>
+  </header>
+
+  <p id="tagline" class="text-center text-slate-400 text-xs sm:text-sm mb-6">One platform · Every subject · Every language</p>
+
+  <div id="fatal" role="alert"
+       class="hidden max-w-2xl mx-auto mb-4 p-4 rounded-xl text-sm whitespace-pre-wrap break-words
+              bg-red-500/10 border border-red-500/50 text-red-200"></div>
+
+  <nav id="steps" aria-label="Progress"
+       class="flex flex-wrap justify-center gap-2 mb-6"></nav>
 
   <!-- LEVEL -->
-  <section id="s-level" class="screen active">
-    <h2 class="title" id="tLevel">Choose your level</h2>
-    <p class="sub" id="sLevel">From Class 8 to PhD — pick where you stand</p>
-    <div class="grid g-level" id="levelGrid"></div>
+  <section id="s-level" class="screen active" aria-labelledby="tLevel">
+    <h2 id="tLevel" class="text-xl sm:text-3xl font-extrabold text-center tracking-tight mb-1">Choose your level</h2>
+    <p id="sLevel" class="text-center text-slate-400 text-xs sm:text-sm mb-6">From Class 8 to PhD — pick where you stand</p>
+    <div id="levelGrid" class="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"></div>
   </section>
 
   <!-- SUBJECT -->
-  <section id="s-subject" class="screen">
-    <h2 class="title" id="tSubject">Choose your subject</h2>
-    <p class="sub" id="sSubject"></p>
-    <div class="grid g-sub" id="subjectGrid"></div>
-    <div class="center"><button class="btn ghost" id="backLevel">← Back</button></div>
+  <section id="s-subject" class="screen hidden" aria-labelledby="tSubject">
+    <h2 id="tSubject" class="text-xl sm:text-3xl font-extrabold text-center tracking-tight mb-1">Choose your subject</h2>
+    <p id="sSubject" class="text-center text-slate-400 text-xs sm:text-sm mb-6"></p>
+    <div id="subjectGrid" class="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"></div>
+    <div class="flex justify-center mt-6"><button class="btn ghost" id="backLevel" type="button">← Back</button></div>
   </section>
 
   <!-- LANGUAGE -->
-  <section id="s-lang" class="screen">
-    <h2 class="title" id="tLang">Choose exam language</h2>
-    <p class="sub" id="sLang">Questions are translated automatically into your language</p>
-    <div class="grid g-lang" id="langGrid"></div>
-    <div class="center"><button class="btn ghost" id="backSubject">← Back</button></div>
+  <section id="s-lang" class="screen hidden" aria-labelledby="tLang">
+    <h2 id="tLang" class="text-xl sm:text-3xl font-extrabold text-center tracking-tight mb-1">Choose exam language</h2>
+    <p id="sLang" class="text-center text-slate-400 text-xs sm:text-sm mb-6">Questions are translated automatically into your language</p>
+    <div id="langGrid" class="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6"></div>
+    <div class="flex justify-center mt-6"><button class="btn ghost" id="backSubject" type="button">← Back</button></div>
   </section>
 
   <!-- READY -->
-  <section id="s-ready" class="screen">
-    <h2 class="title" id="tReady">Ready to begin?</h2>
-    <p class="sub" id="sReady"></p>
+  <section id="s-ready" class="screen hidden" aria-labelledby="tReady">
+    <h2 id="tReady" class="text-xl sm:text-3xl font-extrabold text-center tracking-tight mb-1">Ready to begin?</h2>
+    <p id="sReady" class="text-center text-slate-400 text-xs sm:text-sm mb-6"></p>
     <div class="panel">
       <div class="kv"><span id="kSubject">Subject</span><b id="vSubject">—</b></div>
       <div class="kv"><span id="kLevel">Level</span><b id="vLevel">—</b></div>
       <div class="kv"><span id="kLang">Language</span><b id="vLang">—</b></div>
-      <div class="kv"><span id="kQ">Questions</span><b>100</b></div>
-      <div class="kv"><span id="kMarks">Marks per question</span><b>2</b></div>
-      <div class="kv"><span id="kTotal">Total marks</span><b>200</b></div>
+      <div class="kv"><span id="kQ">Questions</span><b id="vQ">100</b></div>
+      <div class="kv"><span id="kMarks">Marks per question</span><b id="vMarks">2</b></div>
+      <div class="kv"><span id="kTotal">Total marks</span><b id="vTotal">200</b></div>
       <div class="kv"><span id="kTime">Duration</span><b id="vTime">120 min</b></div>
       <div class="kv"><span id="kPass">Passing criteria</span><b id="vPass">&gt; 60%</b></div>
       <ul class="rules" id="rulesList"></ul>
-      <div class="readyWrap"><button class="readyBtn" id="btnReady">I'm Ready — Start Exam</button></div>
+      <div class="readyWrap">
+        <button class="readyBtn" id="btnReady" type="button">I'm Ready — Start Exam</button>
+      </div>
     </div>
-    <div class="center"><button class="btn ghost" id="backLang">← Back</button></div>
+    <div class="flex justify-center mt-6"><button class="btn ghost" id="backLang" type="button">← Back</button></div>
   </section>
 
   <!-- EXAM -->
-  <section id="s-exam" class="screen">
+  <section id="s-exam" class="screen hidden" aria-labelledby="qText">
     <div class="exam-head">
       <div class="pills">
-        <span class="pill" id="exSubject"></span><span class="pill" id="exLevel"></span>
+        <span class="pill" id="exSubject"></span>
+        <span class="pill" id="exLevel"></span>
       </div>
-      <div class="timer" id="timer">02:00:00</div>
-      <button class="btn sm danger" id="btnSubmitTop">Submit</button>
+      <div class="timer" id="timer" role="timer" aria-live="polite">02:00:00</div>
+      <button class="btn sm danger" id="btnSubmitTop" type="button">Submit</button>
     </div>
+
     <div class="exam-body">
       <div class="qpanel">
-        <div class="qmeta"><span id="qIndex">Question 1 / 100</span><span id="qMarks">+2 Marks</span></div>
+        <div class="qmeta">
+          <span id="qIndex">Question 1 / 100</span>
+          <span id="qMarks">+2 Marks</span>
+        </div>
         <div class="qtext" id="qText"></div>
-        <div class="options" id="options"></div>
+        <div class="options" id="options" role="radiogroup" aria-labelledby="qText"></div>
         <div class="qactions">
           <div class="left">
-            <button class="btn sm" id="btnPrev">← Prev</button>
-            <button class="btn sm ghost" id="btnClear">Clear</button>
-            <button class="btn sm ghost" id="btnMark">Mark</button>
+            <button class="btn sm" id="btnPrev" type="button">← Prev</button>
+            <button class="btn sm ghost" id="btnClear" type="button">Clear</button>
+            <button class="btn sm ghost" id="btnMark" type="button">Mark</button>
           </div>
-          <button class="btn sm primary" id="btnNext">Next →</button>
+          <button class="btn sm primary" id="btnNext" type="button">Next →</button>
         </div>
       </div>
-      <aside class="palette" id="palette">
+
+      <aside class="palette" id="palette" aria-label="Question palette">
         <div class="palette-close">
           <span id="palTitle">Question Palette</span>
           <button type="button" id="paletteClose" aria-label="Close palette">✕</button>
         </div>
-        <div class="pgrid" id="pgrid"></div>
+        <div class="pgrid" id="pgrid" role="navigation" aria-label="Jump to question"></div>
         <div class="legend">
           <span><i class="sw" style="background:rgba(34,197,94,.5)"></i><span id="lgAns">Answered</span></span>
           <span><i class="sw" style="background:rgba(245,158,11,.6)"></i><span id="lgMark">Marked</span></span>
@@ -98,49 +162,55 @@
         </div>
       </aside>
     </div>
-    <button class="palette-toggle" id="paletteToggle" aria-label="Open question palette">☰</button>
+
+    <button class="palette-toggle" id="paletteToggle" type="button" aria-label="Open question palette">☰</button>
     <div class="palette-backdrop" id="paletteBackdrop"></div>
   </section>
 
   <!-- RESULT -->
-  <section id="s-result" class="screen">
+  <section id="s-result" class="screen hidden" aria-labelledby="verdict">
     <div class="resultWrap">
       <div class="ringBox">
         <svg viewBox="0 0 200 200" aria-hidden="true">
           <circle class="ring-bg" cx="100" cy="100" r="86"></circle>
           <circle class="ring-fg" id="ringFg" cx="100" cy="100" r="86"></circle>
         </svg>
-        <div class="ringTxt"><div class="big" id="ringPct">0%</div><div class="small" id="ringLbl">Score</div></div>
+        <div class="ringTxt">
+          <div class="big" id="ringPct">0%</div>
+          <div class="small" id="ringLbl">Score</div>
+        </div>
       </div>
       <div class="verdict" id="verdict">—</div>
       <p class="sub" id="verdictSub"></p>
       <div class="stats" id="stats"></div>
-      <div class="center">
-        <button class="btn primary" id="btnReview">Review Answers</button>
-        <button class="btn" id="btnRetake">Retake Exam</button>
-        <button class="btn ghost" id="btnHome">Home</button>
+      <div class="flex flex-wrap justify-center gap-3 mt-6">
+        <button class="btn primary" id="btnReview" type="button">Review Answers</button>
+        <button class="btn" id="btnRetake" type="button">Retake Exam</button>
+        <button class="btn ghost" id="btnHome" type="button">Home</button>
       </div>
     </div>
   </section>
 
   <!-- REVIEW -->
-  <section id="s-review" class="screen">
-    <h2 class="title" id="tReview">Answer Review</h2>
-    <p class="sub" id="sReview"></p>
+  <section id="s-review" class="screen hidden" aria-labelledby="tReview">
+    <h2 id="tReview" class="text-xl sm:text-3xl font-extrabold text-center tracking-tight mb-1">Answer Review</h2>
+    <p id="sReview" class="text-center text-slate-400 text-xs sm:text-sm mb-6"></p>
     <div id="reviewList"></div>
-    <div class="center"><button class="btn primary" id="btnBackResult">← Back to Result</button></div>
+    <div class="flex justify-center mt-6">
+      <button class="btn primary" id="btnBackResult" type="button">← Back to Result</button>
+    </div>
   </section>
 
-  <p class="note" id="footNote"></p>
-</div>
+  <p id="footNote" class="text-center text-[11.5px] text-slate-500 mt-6 leading-relaxed px-2"></p>
+</main>
 
-<div class="modal" id="modal" role="dialog" aria-modal="true">
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">
   <div class="modalBox">
     <h3 id="mTitle">Submit exam?</h3>
     <p id="mText">You still have unanswered questions.</p>
-    <div class="center" style="margin-top:0">
-      <button class="btn" id="mCancel">Cancel</button>
-      <button class="btn primary" id="mOk">Submit</button>
+    <div class="flex justify-center gap-3 mt-2">
+      <button class="btn" id="mCancel" type="button">Cancel</button>
+      <button class="btn primary" id="mOk" type="button">Submit</button>
     </div>
   </div>
 </div>
@@ -148,6 +218,7 @@
 <script src="js/util.js"></script>
 <script src="js/i18n.js"></script>
 <script src="js/data.js"></script>
+<script src="js/questions.js"></script>
 <script src="js/generators.js"></script>
 <script src="js/app.js"></script>
 </body>
