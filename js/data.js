@@ -43,7 +43,27 @@ const SUBJ = {
   cognitiveScience:['Cognitive Science','संज्ञानात्मक विज्ञान','জ্ঞানভিত্তিক বিজ্ঞান','علمِ ادراک','Ciencia Cognitiva','Sciences cognitives'],
   advancedStatistics:['Advanced Statistics','उच्च सांख्यिकी','উচ্চতর পরিসংখ্যান','اعلیٰ شماریات','Estadística Avanzada','Statistiques avancées'],
   scientificWriting:['Scientific Writing','वैज्ञानिक लेखन','বৈজ্ঞানিক লেখন','سائنسی تحریر','Escritura Científica','Rédaction scientifique'],
-  researchEthics:['Research Ethics','शोध नैतिकता','গবেষণা নীতিশাস্ত্র','تحقیقی اخلاقیات','Ética de la Investigación','Éthique de la recherche']
+  researchEthics:['Research Ethics','शोध नैतिकता','গবেষণা নীতিশাস্ত্র','تحقیقی اخلاقیات','Ética de la Investigación','Éthique de la recherche'],
+
+  /* ---------- Tally ERP 9 (fixed-bank subjects) ---------- */
+  tallyBasics:['Tally – Basics & Vouchers',
+    'टैली – मूल बातें और वाउचर',
+    'ট্যালি – বেসিক ও ভাউচার',
+    'ٹیلی – بنیادی باتیں اور واؤچر',
+    'Tally – Básico y Comprobantes',
+    'Tally – Bases et Vouchers'],
+  tallyConfig:['Tally – Company, Ledger & GST',
+    'टैली – कंपनी, लेजर और जीएसटी',
+    'ট্যালি – কোম্পানি, লেজার ও জিএসটি',
+    'ٹیلی – کمپنی، لیجر اور جی ایس ٹی',
+    'Tally – Empresa, Mayor y GST',
+    'Tally – Société, Grand Livre et GST'],
+  tallyJournal:['Tally – Shortcuts & Journal Entries',
+    'टैली – शॉर्टकट और जर्नल प्रविष्टियाँ',
+    'ট্যালি – শর্টকাট ও জার্নাল এন্ট্রি',
+    'ٹیلی – شارٹ کٹ اور جرنل انٹریز',
+    'Tally – Atajos y Asientos de Diario',
+    'Tally – Raccourcis et Écritures de Journal']
 };
 
 function sname(key){
@@ -54,8 +74,18 @@ function sname(key){
 /* ============================================================
    Levels → subjects
    Each subject: [displayKey, bankKey, icon]
+   bankKey starting with "tally" refers to FIXED_BANKS in questions.js
 ============================================================ */
 const LEVELS = [
+  /* ---------- Tally ERP 9 (PDF question bank) ---------- */
+  { id:'tally', name:['Tally ERP 9','टैली ईआरपी 9','ট্যালি ইআরপি ৯','ٹیلی ای آر پی ۹','Tally ERP 9','Tally ERP 9'],
+    d:1, icon:'📊',
+    subjects:[
+      ['tallyBasics','tally1','📘'],
+      ['tallyConfig','tally2','📗'],
+      ['tallyJournal','tally3','📕']
+    ]},
+
   { id:'c8', name:['Class 8','कक्षा 8','অষ্টম শ্রেণি','آٹھویں جماعت','8.º grado','8e année'],
     d:1, icon:'🎒',
     subjects:[
@@ -124,7 +154,7 @@ const LEVELS = [
 ];
 
 /* ============================================================
-   Reference tables used by the question generators
+   Reference tables (unchanged)
 ============================================================ */
 const ELEMENTS = {
   hydrogen:['H',1], oxygen:['O',8], carbon:['C',6], nitrogen:['N',7],
@@ -145,7 +175,6 @@ const MOLAR = {
   sulphuricAcid:'98 g/mol', hydrochloricAcid:'36.5 g/mol',
   sodiumChloride:'58.5 g/mol', glucose:'180 g/mol'
 };
-
 const UNIT_OF = {
   force:'newton', work:'joule', energy:'joule', power:'watt', pressure:'pascal',
   charge:'coulomb', frequency:'hertz', resistance:'ohm',
@@ -153,7 +182,6 @@ const UNIT_OF = {
 };
 const ALL_UNITS = ['newton','joule','watt','pascal','ampere','volt',
                    'ohm','coulomb','hertz','tesla','farad','weber'];
-
 const BALANCED = [
   ['2H₂ + O₂ → 2H₂O', ['H₂ + O₂ → H₂O','H₂ + O₂ → 2H₂O','2H₂ + O₂ → H₂O']],
   ['2Na + Cl₂ → 2NaCl', ['Na + Cl₂ → NaCl','Na + Cl₂ → 2NaCl','2Na + Cl → 2NaCl']],
@@ -162,7 +190,6 @@ const BALANCED = [
   ['2Mg + O₂ → 2MgO', ['Mg + O₂ → MgO','Mg + O₂ → 2MgO','2Mg + O₂ → MgO']],
   ['Zn + 2HCl → ZnCl₂ + H₂', ['Zn + HCl → ZnCl₂ + H₂','Zn + 2HCl → ZnCl + H₂','Zn + 2HCl → ZnCl₂ + 2H₂']]
 ];
-
 const SYNONYMS = [
   ['happy','joyful','sad'],['quick','rapid','slow'],['brave','courageous','timid'],
   ['begin','commence','finish'],['big','huge','tiny'],['angry','furious','calm'],
@@ -213,7 +240,6 @@ const COMPLEXITY = [
   ['insertion sort','O(n²)'],['heap sort','O(n log n)'],
   ['accessing an array element','O(1)']
 ];
-
 const CAPITALS = [
   ['india','delhi'],['france','paris'],['japan','tokyo'],['unitedKingdom','london'],
   ['china','beijing'],['russia','moscow'],['australia','canberra'],['canada','ottawa'],
